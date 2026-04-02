@@ -708,29 +708,47 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function submitForm() {
-    const data = {
-      firstName: document.getElementById('firstName').value,
-      lastName:  document.getElementById('lastName').value,
-      email:     document.getElementById('email').value,
-      phone:     document.getElementById('phone').value,
-      state:     document.getElementById('state').value,
-      school:    document.getElementById('school').value,
-      gradYear:  document.getElementById('gradYear').value,
-      role:      document.querySelector('.toggle-btn.active')?.textContent || '',
-      webinar:   'Harvard — Massachusetts'
-    };
+ async function submitForm() {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
 
-    fetch('https://hook.eu1.make.com/19qgphuclwtx53urhettihcw5t8h4mhl', {
+  const data = {
+    firstName: document.getElementById('firstName').value,
+    lastName:  document.getElementById('lastName').value,
+    email:     document.getElementById('email').value,
+    phone:     document.getElementById('phone').value,
+    state:     document.getElementById('state').value,
+    school:    document.getElementById('school').value,
+    gradYear:  document.getElementById('gradYear').value,
+    role:      document.querySelector('.toggle-btn.active')?.textContent || '',
+    webinar:   'Harvard — Massachusetts'
+  };
+
+  // Лог в консоль — открой DevTools (F12) и проверяй
+  console.log('Sending data:', data);
+
+  try {
+    const res = await fetch('https://hook.eu1.make.com/19qgphuclwtx53urhettihcw5t8h4mhl', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
-    }).catch(() => {});
+    });
+
+    console.log('Make response status:', res.status);
+    const text = await res.text();
+    console.log('Make response body:', text);
 
     fbq('track', 'Lead');
-
     window.location.href = 'https://chat.whatsapp.com/CeoK1Eaugoi38Om6TuTRVx?mode=gi_t';
+
+  } catch (err) {
+    console.error('Webhook failed:', err);
+    alert('Что-то пошло не так. Попробуйте ещё раз.');
+    btn.disabled = false;
+    btn.textContent = 'Submit';
   }
+}
 
   function formatPhone(input) {
     let val = input.value.replace(/\D/g, '').slice(0, 10);
